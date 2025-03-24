@@ -707,26 +707,3 @@ class SpaReader : public Component, public UARTDevice, public CustomAPIDevice {
     }
   }
 };
-void set_sensor(const std::string &id, sensor::Sensor *sens) {
-    if (id == "temp_sensor") temp_sensor = sens;
-    else if (id == "target_temp_sensor") target_temp_sensor = sens;
-    else if (id == "jet1_sensor") jet1_sensor = sens;
-    else if (id == "jet2_sensor") jet2_sensor = sens;
-    else if (id == "jet3_sensor") jet3_sensor = sens;
-    else if (id == "light_sensor") light_sensor = sens;
-    else if (id == "restmode_sensor") restmode_sensor = sens;
-    else if (id == "highrange_sensor") highrange_sensor = sens;
-    else if (id == "hour_sensor") hour_sensor = sens;
-    else if (id == "minute_sensor") minute_sensor = sens;
-    else if (id == "heater_sensor") heater_sensor = sens;
-    else if (id == "circ_sensor") circ_sensor = sens;
-    else if (id == "filt1hour_sensor") filt1hour_sensor = sens;
-    else if (id == "filt1minute_sensor") filt1minute_sensor = sens;
-    else if (id == "filt1durhour_sensor") filt1durhour_sensor = sens;
-    else if (id == "filt1durminute_sensor") filt1durminute_sensor = sens;
-    else if (id == "filt2enable_sensor") filt2enable_sensor = sens;
-    else if (id == "filt2hour_sensor") filt2hour_sensor = sens;
-    else if (id == "filt2minute_sensor") filt2minute_sensor = sens;
-    else if (id == "filt2durhour_sensor") filt2durhour_sensor = sens;
-    else if (id == "filt2durminute_sensor") filt2durminute_sensor = sens;
-}
