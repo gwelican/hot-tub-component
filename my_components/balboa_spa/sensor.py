@@ -9,12 +9,11 @@ from esphome.const import (
 
 from . import CONF_SPA_ID, BalboaSpa
 
+# Component dependencies and metadata
 DEPENDENCIES = ["uart", "balboa_spa"]
-
 CODEOWNERS = ["@pvarsanyi"]
 
-
-# Define all available sensors
+# Define all available sensor configuration keys
 CONF_CURRENT_TEMPERATURE = "current_temperature"
 CONF_TARGET_TEMP = "target_temperature"
 CONF_JET1 = "jet1"
@@ -37,7 +36,7 @@ CONF_FILT2_MINUTE = "filt2minute"
 CONF_FILT2_DURHOUR = "filt2durhour"
 CONF_FILT2_DURMINUTE = "filt2durminute"
 
-
+# Configuration schema for the sensor component
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
     cv.Optional(CONF_CURRENT_TEMPERATURE): sensor.sensor_schema(
@@ -74,14 +73,20 @@ CONFIG_SCHEMA = cv.Schema({
 
 async def to_code(config):
     """Generate code for the spa sensors."""
+    # Get the spa component
     hub = await cg.get_variable(config[CONF_SPA_ID])
     
+    # Process each sensor configuration
     for key, conf in config.items():
         if key == CONF_SPA_ID:
             continue
         if not isinstance(conf, dict):  # Skip non-dictionary configs
             continue
+            
+        # Create the sensor
         var = await sensor.new_sensor(conf)
+        
+        # Set the appropriate setter method based on the sensor type
         if key == CONF_CURRENT_TEMPERATURE:
             cg.add(getattr(hub, "set_current_temperature_sensor")(var))
         else:

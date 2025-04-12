@@ -1,5 +1,6 @@
 #include <CircularBuffer.hpp>
 
+#include <Arduino.h>
 #include <string>
 #include "balboa_spa.h"
 #include "esphome/core/log.h"
@@ -155,7 +156,6 @@ namespace esphome
 
         void BalboaSpa::decodeSettings()
         {
-            // ESP_LOGD("Spa/config/status", "Got config");
             SpaConfig.pump1 = Q_in[5] & 0x03;
             SpaConfig.pump2 = (Q_in[5] & 0x0C) >> 2;
             SpaConfig.light1 = (Q_in[7] & 0x03);
@@ -164,11 +164,6 @@ namespace esphome
         }
         void BalboaSpa::decodeState()
         {
-            String s;
-            float e = 0.0;
-            float d = 0.0;
-            float c = 0.0;
-
             // target temperature
             float target_temperature = Q_in[25];
             target_temp_sensor->publish_state(target_temperature);
@@ -246,10 +241,6 @@ namespace esphome
         }
         void BalboaSpa::decodeFilterSettings()
         {
-            // String s;
-            // String d;
-            // String payld;
-            // Read data
             SpaFilterSettings.filt1Hour = Q_in[5];
             SpaFilterSettings.filt1Minute = Q_in[6];
             SpaFilterSettings.filt1DurationHour = Q_in[7];
