@@ -64,7 +64,6 @@ namespace esphome
       void decodeFault();
       void rs485_send();
       void print_msg(CircularBuffer<uint8_t, 35> &data);
-      void on_set_temp(float temp);
       void on_target_temperature_update(float value);
       float get_setup_priority() const override { return setup_priority::LATE; }
       CircularBuffer<uint8_t, 35> Q_in;

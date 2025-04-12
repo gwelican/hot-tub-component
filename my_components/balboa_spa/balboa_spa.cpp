@@ -17,6 +17,7 @@ namespace esphome
         static const char *const TAG = "balboa_spa";
         uint8_t last_state_crc = 0x00;
         uint8_t command_to_send_ = 0x00;
+        
         uint8_t settemp = 0x00;
         uint8_t sethour = 0x00;
         uint8_t setminute = 0x00;
@@ -45,12 +46,8 @@ namespace esphome
             Q_out.clear();
             Q_in.clear();
             ESP_LOGCONFIG(TAG, "Setting up Balboa Spa Component...");
-            
-            // thip->last_update_ = millis(); // Initialize timestamp for periodic updates
-            // Optionally: Perform initial UART read or write if needed
         }
-        struct
-        { //: specifies the amount of bits reserved for the variable
+        struct {
             uint8_t jet1 : 2;
             uint8_t jet2 : 2;
             uint8_t light : 1;
@@ -60,15 +57,13 @@ namespace esphome
             uint8_t hour : 5;
             uint8_t minutes : 6;
         } SpaState;
-        struct
-        {
+        struct {
             uint8_t pump1 : 2;
             uint8_t pump2 : 2;
             uint8_t light1 : 1;
             uint8_t temp_scale : 1; // 0 -> Farenheit, 1-> Celcius
         } SpaConfig;
-        struct
-        {
+        struct {
             uint8_t totEntry : 5;
             uint8_t currEntry : 5;
             uint8_t faultCode : 6;
@@ -77,8 +72,7 @@ namespace esphome
             uint8_t hour : 5;
             uint8_t minutes : 6;
         } SpaFaultLog;
-        struct
-        {
+        struct {
             uint8_t filt1Hour : 5;
             uint8_t filt1Minute : 6;
             uint8_t filt1DurationHour : 5;
@@ -384,47 +378,47 @@ namespace esphome
             // ESP_LOGD("Spa/debug/have_faultlog", "have the faultlog, #2");
         }
 
-        void BalboaSpa::on_set_temp(float temp)
-        {
-            if (temp >= 26 || temp <= 40)
-            {
-                settemp = temp;
-                command_to_send_ = 0xff;
-            }
-        }
-        void on_set_clock(int hour, int minute)
-        {
-            if ((hour >= 0 || hour <= 23) && (minute >= 0 || minute <= 59))
-            {
-                sethour = hour;
-                setminute = minute;
-                command_to_send_ = 0x21;
-            }
-            else
-            {
-                // ESP_LOGD("Spa/SetValues/Clock", "Invalid variable values!");
-            }
-        }
-        void on_set_filtration(int f1hour, int f1min, int f1durhour, int f1durmin, int f2enab, int f2hour, int f2min, int f2durhour, int f2durmin)
-        {
-            if ((f1hour >= 0 || f1hour <= 23) && (f1min >= 0 || f1min <= 59) && (f1durhour >= 0 || f1durhour <= 23) && (f1durmin >= 0 || f1durmin <= 59) && (f2enab == 0 || f2enab == 1) && (f2hour >= 0 || f2hour <= 23) && (f2min >= 0 || f2min <= 23) && (f2durhour >= 0 || f2durhour <= 23) && (f2durmin >= 0 || f2durmin <= 23))
-            {
-                setfilt1Hour = f1hour;
-                setfilt1Minute = f1min;
-                setfilt1DurationHour = f1durhour;
-                setfilt1DurationMinute = f1durmin;
-                setfilt2HourEnable = f2hour ^ (f2enab << 7);
-                setfilt2Minute = f2min;
-                setfilt2DurationHour = f2durhour;
-                setfilt2DurationMinute = f2durmin;
-                have_filtersettings = 0; // Re-request settings after change
-                command_to_send_ = 0x23;
-            }
-            else
-            {
-                ESP_LOGD("Spa/SetValues/Filtration", "Invalid variable values!");
-            }
-        }
+        // void BalboaSpa::on_set_temp(float temp)
+        // {
+        //     if (temp >= 26 || temp <= 40)
+        //     {
+        //         settemp = temp;
+        //         command_to_send_ = 0xff;
+        //     }
+        // }
+        // void on_set_clock(int hour, int minute)
+        // {
+        //     if ((hour >= 0 || hour <= 23) && (minute >= 0 || minute <= 59))
+        //     {
+        //         sethour = hour;
+        //         setminute = minute;
+        //         command_to_send_ = 0x21;
+        //     }
+        //     else
+        //     {
+        //         // ESP_LOGD("Spa/SetValues/Clock", "Invalid variable values!");
+        //     }
+        // }
+        // void on_set_filtration(int f1hour, int f1min, int f1durhour, int f1durmin, int f2enab, int f2hour, int f2min, int f2durhour, int f2durmin)
+        // {
+        //     if ((f1hour >= 0 || f1hour <= 23) && (f1min >= 0 || f1min <= 59) && (f1durhour >= 0 || f1durhour <= 23) && (f1durmin >= 0 || f1durmin <= 59) && (f2enab == 0 || f2enab == 1) && (f2hour >= 0 || f2hour <= 23) && (f2min >= 0 || f2min <= 23) && (f2durhour >= 0 || f2durhour <= 23) && (f2durmin >= 0 || f2durmin <= 23))
+        //     {
+        //         setfilt1Hour = f1hour;
+        //         setfilt1Minute = f1min;
+        //         setfilt1DurationHour = f1durhour;
+        //         setfilt1DurationMinute = f1durmin;
+        //         setfilt2HourEnable = f2hour ^ (f2enab << 7);
+        //         setfilt2Minute = f2min;
+        //         setfilt2DurationHour = f2durhour;
+        //         setfilt2DurationMinute = f2durmin;
+        //         have_filtersettings = 0; // Re-request settings after change
+        //         command_to_send_ = 0x23;
+        //     }
+        //     else
+        //     {
+        //         ESP_LOGD("Spa/SetValues/Filtration", "Invalid variable values!");
+        //     }
+        // }
         
         void BalboaSpa::rs485_send()
         {
@@ -443,11 +437,8 @@ namespace esphome
                 this->write(Q_out[i]);
             }
 
-            // print_msg(Q_out);
-
             this->flush();
 
-            // DEBUG: print_msg(Q_out);
             Q_out.clear();
         }
 
@@ -614,7 +605,6 @@ namespace esphome
                     {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
-                            // ESP_LOGD("Spa/debug/have_faultlog", "decoding settings");
                             decodeSettings();
                         }
                     }
@@ -622,7 +612,6 @@ namespace esphome
                     {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
-                            // ESP_LOGD("Spa/debug/have_faultlog", "decoding fault");
                             decodeFault();
                         }
                     }
@@ -630,7 +619,6 @@ namespace esphome
                     { // FF AF 13:Status Update - Packet index offset 5
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
-                            // ESP_LOGD("Spa/debug/have_faultlog", "decoding state");
                             decodeState();
                         }
                     }
@@ -638,16 +626,10 @@ namespace esphome
                     { // FF AF 23:Filter Cycle Message - Packet index offset 5
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
-                            // ESP_LOGD("Spa/debug/have_faultlog", "decoding filter settings");
                             decodeFilterSettings();
                         }
-                    } // else {
-                      //  DEBUG for finding meaning
-                      // if (Q_in[2] & 0xFE || Q_in[2] == id)
-                      // print_msg(Q_in);
-                    //}
+                    } 
 
-                    // Clean up queue
                     yield();
                     Q_in.clear();
                 }
@@ -663,13 +645,13 @@ namespace esphome
         }
 
         void BalboaSpaTemperature::control(float value) {
-            if (parent_ && value >= 60 && value <= 104) {  // Temperature range check
+            if (parent_ && value >= 60 && value <= 104) {
                 parent_->set_target_temperature(value);
             }
             publish_state(value);
         }
 
-        void BalboaSpaButton::press_action() {  // Changed from press() to press_action()
+        void BalboaSpaButton::press_action() {
             if (parent_) {
                 parent_->set_command(command_code_);
             }
@@ -677,7 +659,7 @@ namespace esphome
 
         void BalboaSpa::on_target_temperature_update(float value) {
             settemp = value;
-            command_to_send_ = 0xff;  // Trigger temperature update command
+            command_to_send_ = 0xff;
         }
 
     } // namespace balboa_spa
