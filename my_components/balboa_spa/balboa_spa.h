@@ -22,31 +22,33 @@ namespace esphome
       void write_state(bool state) override;
       void setup() override {}
       void set_command_code(uint8_t code) { command_code_ = code; }
-      void set_parent(BalboaSpa* parent) { parent_ = parent; }
+      void set_parent(BalboaSpa *parent) { parent_ = parent; }
 
     protected:
       uint8_t command_code_{0x00};
-      BalboaSpa* parent_{nullptr};
+      BalboaSpa *parent_{nullptr};
     };
 
-    class BalboaSpaTemperature : public number::Number, public Component {
+    class BalboaSpaTemperature : public number::Number, public Component
+    {
     public:
-        void control(float value) override;
-        void set_parent(BalboaSpa* parent) { parent_ = parent; }
+      void control(float value) override;
+      void set_parent(BalboaSpa *parent) { parent_ = parent; }
 
     protected:
-        BalboaSpa* parent_{nullptr};
+      BalboaSpa *parent_{nullptr};
     };
 
-    class BalboaSpaButton : public button::Button, public Component {
+    class BalboaSpaButton : public button::Button, public Component
+    {
     public:
-        void set_command_code(uint8_t code) { command_code_ = code; }
-        void set_parent(BalboaSpa* parent) { parent_ = parent; }
-        void press_action() override;
+      void set_command_code(uint8_t code) { command_code_ = code; }
+      void set_parent(BalboaSpa *parent) { parent_ = parent; }
+      void press_action() override;
 
     protected:
-        uint8_t command_code_{0x00};
-        BalboaSpa* parent_{nullptr};
+      uint8_t command_code_{0x00};
+      BalboaSpa *parent_{nullptr};
     };
 
     class BalboaSpa : public Component, public uart::UARTDevice
@@ -65,47 +67,54 @@ namespace esphome
       void on_set_temp(float temp);
       void on_target_temperature_update(float value);
       float get_setup_priority() const override { return setup_priority::LATE; }
-      
-      // Command setter for switches
+      CircularBuffer<uint8_t, 35> Q_in;
+      CircularBuffer<uint8_t, 35> Q_out;
+
+      // Command setter
       void set_command(uint8_t cmd) { command_to_send_ = cmd; }
 
       // Switch setters
-      void set_light_switch(BalboaSpaSwitch *sw) { 
-        light_switch_ = sw; 
-        light_switch_->set_command_code(0x11);  // Light toggle command
+      void set_light_switch(BalboaSpaSwitch *sw)
+      {
+        light_switch_ = sw;
+        light_switch_->set_command_code(0x11); // Light toggle command
         light_switch_->set_parent(this);
       }
 
-      void set_heat_mode_switch(BalboaSpaSwitch *sw) { 
-        heat_mode_switch_ = sw; 
-        heat_mode_switch_->set_command_code(0x51);  // Heat mode toggle command
+      void set_heat_mode_switch(BalboaSpaSwitch *sw)
+      {
+        heat_mode_switch_ = sw;
+        heat_mode_switch_->set_command_code(0x51); // Heat mode toggle command
         heat_mode_switch_->set_parent(this);
       }
 
-      void set_jet1_button(BalboaSpaButton *btn) { 
-        jet1_button_ = btn; 
-        jet1_button_->set_command_code(0x04);  // Jet1 toggle command
+      void set_jet1_button(BalboaSpaButton *btn)
+      {
+        jet1_button_ = btn;
+        jet1_button_->set_command_code(0x04); // Jet1 toggle command
         jet1_button_->set_parent(this);
       }
 
-      void set_jet2_button(BalboaSpaButton *btn) { 
-        jet2_button_ = btn; 
-        jet2_button_->set_command_code(0x05);  // Jet2 toggle command
+      void set_jet2_button(BalboaSpaButton *btn)
+      {
+        jet2_button_ = btn;
+        jet2_button_->set_command_code(0x05); // Jet2 toggle command
         jet2_button_->set_parent(this);
       }
 
-      void set_soak_button(BalboaSpaButton *btn) { 
-        soak_button_ = btn; 
-        soak_button_->set_command_code(0x1D);  // Soak command
+      void set_soak_button(BalboaSpaButton *btn)
+      {
+        soak_button_ = btn;
+        soak_button_->set_command_code(0x1D); // Soak command
         soak_button_->set_parent(this);
       }
 
       void set_current_temperature_sensor(sensor::Sensor *sens) { current_temp_sensor = sens; }
-      void set_target_temperature_sensor(sensor::Sensor *sens) { 
+      void set_target_temperature_sensor(sensor::Sensor *sens)
+      {
         target_temp_sensor = sens;
-        target_temp_sensor->add_on_state_callback([this](float value) {
-            this->on_target_temperature_update(value);
-        });
+        target_temp_sensor->add_on_state_callback([this](float value)
+                                                  { this->on_target_temperature_update(value); });
       }
       void set_jet1_sensor(sensor::Sensor *sens) { jet1_sensor = sens; }
       void set_jet2_sensor(sensor::Sensor *sens) { jet2_sensor = sens; }
@@ -125,14 +134,16 @@ namespace esphome
       void set_filt2durhour_sensor(sensor::Sensor *sens) { filt2durhour_sensor = sens; }
       void set_filt2durminute_sensor(sensor::Sensor *sens) { filt2durminute_sensor = sens; }
 
-      void set_target_temperature(float temp) {
-          settemp = temp;
-          command_to_send_ = 0xff;  // Temperature change command
+      void set_target_temperature(float temp)
+      {
+        settemp = temp;
+        command_to_send_ = 0xff; // Temperature change command
       }
 
-      void set_temperature_control(BalboaSpaTemperature *temp_ctrl) {
-          temperature_control_ = temp_ctrl;
-          temperature_control_->set_parent(this);
+      void set_temperature_control(BalboaSpaTemperature *temp_ctrl)
+      {
+        temperature_control_ = temp_ctrl;
+        temperature_control_->set_parent(this);
       }
 
     protected:

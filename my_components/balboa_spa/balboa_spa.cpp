@@ -15,9 +15,6 @@ namespace esphome
     {
 
         static const char *const TAG = "balboa_spa";
-        CircularBuffer<uint8_t, 35> Q_in;
-        CircularBuffer<uint8_t, 35> Q_out;
-        uint8_t x, i, j;
         uint8_t last_state_crc = 0x00;
         uint8_t command_to_send_ = 0x00;
         uint8_t settemp = 0x00;
@@ -120,7 +117,7 @@ namespace esphome
             uint8_t length = data.size();
 
             crc = 0x02;
-            for (i = 0; i < length; i++)
+            for (int i = 0; i < length; i++)
             {
                 crc ^= data[i];
                 for (bit = 0; bit < 8; bit++)
@@ -143,9 +140,9 @@ namespace esphome
         void BalboaSpa::print_msg(CircularBuffer<uint8_t, 35> &data)
         {
             String s;
-            for (i = 0; i < data.size(); i++)
+            for (int i = 0; i < data.size(); i++)
             {
-                x = Q_in[i];
+                int x = Q_in[i];
                 if (x < 0x0A)
                     s += "0";
                 s += String(x, 16);
@@ -441,7 +438,7 @@ namespace esphome
             Q_out.unshift(0x7E);
             Q_out.push(0x7E);
 
-            for (i = 0; i < Q_out.size(); i++)
+            for (int i = 0; i < Q_out.size(); i++)
             {
                 this->write(Q_out[i]);
             }
@@ -479,7 +476,7 @@ namespace esphome
             yield();
             while (this->available() > 0)
             {
-                x = this->read();
+                int x = this->read();
                 Q_in.push(x);
 
                 // Drop until SOF is seen
