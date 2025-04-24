@@ -40,12 +40,12 @@ CONF_FILT2_DURMINUTE = "filt2durminute"
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
     cv.Optional(CONF_CURRENT_TEMPERATURE): sensor.sensor_schema(
-        unit_of_measurement=UNIT_CELSIUS,
+        unit_of_measurement="°F",
         icon=ICON_THERMOMETER,
         accuracy_decimals=1
     ),
     cv.Optional(CONF_TARGET_TEMP): sensor.sensor_schema(
-        unit_of_measurement=UNIT_CELSIUS,
+        unit_of_measurement="°F",
         icon=ICON_THERMOMETER,
         accuracy_decimals=1
     ),
