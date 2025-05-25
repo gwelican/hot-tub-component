@@ -658,8 +658,8 @@ namespace esphome
         }
 
         void BalboaSpa::on_target_temperature_update(float value) {
-            settemp = value;
-            command_to_send_ = 0xff;
+            //settemp = value;
+            //command_to_send_ = 0xff;
         }
 
     } // namespace balboa_spa
