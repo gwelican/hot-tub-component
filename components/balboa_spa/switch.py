@@ -18,23 +18,12 @@ BalboaSpaSwitch = balboa_spa_ns.class_("BalboaSpaSwitch", switch.Switch, cg.Comp
 # Switch configuration keys
 CONF_LIGHT_SWITCH = "light"
 CONF_HEAT_MODE_SWITCH = "heat_mode"
-CONF_JET1_SWITCH = "jet1"
-CONF_JET2_SWITCH = "jet2"
-
-def switch_schema(icon):
-    """Create a schema for a switch with the given icon."""
-    return cv.Schema({
-        cv.GenerateID(): cv.declare_id(BalboaSpaSwitch),
-        cv.Optional(CONF_NAME): cv.string,
-    }).extend(switch.SWITCH_SCHEMA)
 
 # Configuration schema for the switch component
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
-    cv.Optional(CONF_LIGHT_SWITCH): switch_schema(ICON_LIGHTBULB),
-    cv.Optional(CONF_HEAT_MODE_SWITCH): switch_schema(ICON_THERMOMETER),
-    cv.Optional(CONF_JET1_SWITCH): switch_schema("mdi:valve-pipe"),
-    cv.Optional(CONF_JET2_SWITCH): switch_schema("mdi:valve-pipe"),
+    cv.Optional(CONF_LIGHT_SWITCH): switch.switch_schema(BalboaSpaSwitch, icon=ICON_LIGHTBULB),
+    cv.Optional(CONF_HEAT_MODE_SWITCH): switch.switch_schema(BalboaSpaSwitch, icon=ICON_THERMOMETER),
 })
 
 async def to_code(config):
@@ -43,7 +32,7 @@ async def to_code(config):
     spa = await cg.get_variable(config[CONF_SPA_ID])
     
     # Process each switch configuration
-    for key in [CONF_LIGHT_SWITCH, CONF_HEAT_MODE_SWITCH, CONF_JET1_SWITCH, CONF_JET2_SWITCH]:
+    for key in [CONF_LIGHT_SWITCH, CONF_HEAT_MODE_SWITCH]:
         if key not in config:
             continue
             

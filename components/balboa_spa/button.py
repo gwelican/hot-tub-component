@@ -18,15 +18,9 @@ CONF_SOAK_BUTTON = "soak"
 # Configuration schema for the button component
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
-    cv.Optional(CONF_JET1_BUTTON): button.BUTTON_SCHEMA.extend({
-        cv.GenerateID(): cv.declare_id(BalboaSpaButton),
-    }).extend(cv.COMPONENT_SCHEMA),
-    cv.Optional(CONF_JET2_BUTTON): button.BUTTON_SCHEMA.extend({
-        cv.GenerateID(): cv.declare_id(BalboaSpaButton),
-    }).extend(cv.COMPONENT_SCHEMA),
-    cv.Optional(CONF_SOAK_BUTTON): button.BUTTON_SCHEMA.extend({
-        cv.GenerateID(): cv.declare_id(BalboaSpaButton),
-    }).extend(cv.COMPONENT_SCHEMA),
+    cv.Optional(CONF_JET1_BUTTON): button.button_schema(BalboaSpaButton),
+    cv.Optional(CONF_JET2_BUTTON): button.button_schema(BalboaSpaButton),
+    cv.Optional(CONF_SOAK_BUTTON): button.button_schema(BalboaSpaButton),
 })
 
 async def to_code(config):

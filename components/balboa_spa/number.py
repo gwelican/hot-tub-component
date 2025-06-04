@@ -20,12 +20,12 @@ CONF_TEMPERATURE = "temperature"
 # Configuration schema for the number component
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(CONF_SPA_ID): cv.use_id(BalboaSpa),
-    cv.Optional(CONF_TEMPERATURE): number.NUMBER_SCHEMA.extend({
-        cv.GenerateID(): cv.declare_id(BalboaSpaTemperature),
-        cv.Optional(CONF_MIN_VALUE, default=26): cv.float_,
-        cv.Optional(CONF_MAX_VALUE, default=40): cv.float_,
-        cv.Optional(CONF_STEP, default=0.5): cv.float_,
-    }).extend(cv.COMPONENT_SCHEMA),
+    cv.Optional(CONF_TEMPERATURE): number.number_schema(
+        BalboaSpaTemperature,
+        min_value=26,
+        max_value=40,
+        step=0.5,
+    ),
 })
 
 async def to_code(config):
@@ -35,13 +35,9 @@ async def to_code(config):
         spa = await cg.get_variable(config[CONF_SPA_ID])
         
         # Create and register the temperature control
-        var = await number.new_number(
-            config[CONF_TEMPERATURE],
-            min_value=config[CONF_TEMPERATURE][CONF_MIN_VALUE],
-            max_value=config[CONF_TEMPERATURE][CONF_MAX_VALUE],
-            step=config[CONF_TEMPERATURE][CONF_STEP],
-        )
+        var = cg.new_Pvariable(config[CONF_TEMPERATURE][CONF_ID])
         await cg.register_component(var, config[CONF_TEMPERATURE])
+        await number.register_number(var, config[CONF_TEMPERATURE])
         
         # Set the temperature control
         cg.add(spa.set_temperature_control(var)) 
