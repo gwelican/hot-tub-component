@@ -3,9 +3,6 @@ import esphome.config_validation as cv
 from esphome.components import number
 from esphome.const import (
     CONF_ID,
-    CONF_MIN_VALUE,
-    CONF_MAX_VALUE,
-    CONF_STEP,
 )
 from . import CONF_SPA_ID, BalboaSpa, balboa_spa_ns
 
@@ -24,9 +21,9 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_MANUAL_TARGET_TEMPERATURE): number.number_schema(
         BalboaSpaTemperature
     ).extend({
-        cv.Optional(CONF_MIN_VALUE, default=70): cv.float_,
-        cv.Optional(CONF_MAX_VALUE, default=106): cv.float_,
-        cv.Optional(CONF_STEP, default=1): cv.float_,
+        cv.Optional("min_value", default=70): cv.float_,
+        cv.Optional("max_value", default=106): cv.float_,
+        cv.Optional("step", default=1): cv.float_,
     }),
 })
 
@@ -45,9 +42,9 @@ async def to_code(config):
         await number.register_number(
             var, 
             conf,
-            min_value=conf[CONF_MIN_VALUE],
-            max_value=conf[CONF_MAX_VALUE], 
-            step=conf[CONF_STEP]
+            min_value=conf.get("min_value", 70),
+            max_value=conf.get("max_value", 106), 
+            step=conf.get("step", 1)
         )
         
         # Set the temperature control

@@ -15,8 +15,8 @@ CODEOWNERS = ["@pvarsanyi"]
 
 # Define all available sensor configuration keys
 CONF_CURRENT_TEMPERATURE = "current_temperature"
-CONF_TARGET_TEMP = "target_temperature"
-CONF_ACTIVE_TARGET_TEMPERATURE = "active_target_temperature"
+
+CONF_CONTROLLER_TARGET_TEMPERATURE = "controller_target_temperature"
 CONF_JET1 = "jet1"
 CONF_JET2 = "jet2"
 CONF_JET3 = "jet3"
@@ -45,12 +45,8 @@ CONFIG_SCHEMA = cv.Schema({
         icon=ICON_THERMOMETER,
         accuracy_decimals=1
     ),
-    cv.Optional(CONF_TARGET_TEMP): sensor.sensor_schema(
-        unit_of_measurement="°F",
-        icon=ICON_THERMOMETER,
-        accuracy_decimals=1
-    ),
-    cv.Optional(CONF_ACTIVE_TARGET_TEMPERATURE): sensor.sensor_schema(
+
+    cv.Optional(CONF_CONTROLLER_TARGET_TEMPERATURE): sensor.sensor_schema(
         unit_of_measurement="°F",
         icon=ICON_THERMOMETER,
         accuracy_decimals=1

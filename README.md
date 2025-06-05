@@ -30,7 +30,7 @@ This is a custom ESPHome component for controlling Balboa hot tub systems.
 ### Sensors
 - **Current Temperature**: Actual water temperature
 - **Target Temperature**: (Legacy) Target temperature reading
-- **Active Target Temperature**: Read-only sensor showing what the controller is actually set to
+- **Controller Target Temperature**: Read-only sensor showing what the physical controller panel is set to
 - Jet states
 - Light state
 - Rest mode
@@ -41,19 +41,21 @@ This is a custom ESPHome component for controlling Balboa hot tub systems.
 
 ## Temperature Control System
 
-The component uses a dual-sensor approach:
+The component uses a dual-sensor approach for better temperature management:
 
-### Active Target Temperature (Read-Only Sensor)
-- Shows **exactly** what the hot tub controller is set to
+### Controller Target Temperature (Read-Only Sensor)
+- Shows **exactly** what the hot tub's physical controller panel is set to
 - Always updates with controller readings (no filtering)
 - Use this to monitor changes made via the physical panel
+- Never interferes with your manual settings
 
 ### Manual Target Temperature (Number Control)  
 - Write-only control for remote temperature changes
 - Use this to set the temperature remotely from Home Assistant
 - Range: 70-106°F with 1° steps
+- Protected from spurious controller readings
 
-This design lets you see what the controller is set to while providing separate remote control.
+This design provides complete separation between reading what the controller says and setting new values remotely.
 
 ## Usage
 
@@ -97,8 +99,8 @@ sensor:
     spa_id: spa_reader
     current_temperature:
       name: "Spa Current Temperature"
-    active_target_temperature:
-      name: "Spa Active Target Temperature"
+    controller_target_temperature:
+      name: "Spa Controller Target Temperature"
 
 number:
   - platform: balboa_spa

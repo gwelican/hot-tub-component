@@ -1,0 +1,126 @@
+external_components:
+  - source: github://gwelican/hot-tub-component@master
+    components: [ balboa_spa ]
+
+substitutions:
+  friendly_name: &friendly_name Hot Tub
+
+esphome:
+  name: esp-hottub
+  friendly_name: *friendly_name
+
+esp32:
+  board: az-delivery-devkit-v4
+  framework:
+    type: arduino
+
+logger:
+  level: debug
+  logs:
+    uart: INFO
+
+balboa_spa:
+  uart_id: spa_uart_bus
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  password: !secret ota_password
+  platform: esphome
+
+sensor:
+  - platform: wifi_signal
+    name: $friendly_name WiFi Strength
+    update_interval: 60s
+
+  - platform: balboa_spa
+    current_temperature:
+      name: "${friendly_name} Temperature"
+    controller_target_temperature:
+      name: "${friendly_name} Controller Target Temperature"
+    jet1:
+      name: "${friendly_name} Jet 1"
+    jet2:
+      name: "${friendly_name} Jet 2"
+    light:
+      name: "${friendly_name} Light"
+    restmode:
+      name: "${friendly_name} Rest Mode"
+    highrange:
+      name: "${friendly_name} High Range"
+    hour:
+      name: "${friendly_name} Hour"
+    minute:
+      name: "${friendly_name} Minute"
+    heater:
+      name: "${friendly_name} Heater"
+    filt1hour:
+      name: "${friendly_name} Filter 1 Hour"
+    filt1minute:
+      name: "${friendly_name} Filter 1 Minute"
+    filt1durhour:
+      name: "${friendly_name} Filter 1 Duration Hour"
+    filt1durminute:
+      name: "${friendly_name} Filter 1 Duration Minute"
+    filt2enable:
+      name: "${friendly_name} Filter 2 Enable"
+    filt2hour:
+      name: "${friendly_name} Filter 2 Hour"
+    filt2minute:
+      name: "${friendly_name} Filter 2 Minute"
+    filt2durhour:
+      name: "${friendly_name} Filter 2 Duration Hour"
+    filt2durminute:
+      name: "${friendly_name} Filter 2 Duration Minute"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  # power_save_mode: NONE
+  ap:
+    ssid: "Esp-Hottub Fallback Hotspot"
+    password: !secret wifi_backup_password
+
+captive_portal:
+
+bluetooth_proxy:
+  active: True
+
+uart:
+  id: spa_uart_bus
+  tx_pin: GPIO01
+  rx_pin: GPIO03
+  parity: NONE  
+  data_bits: 8
+  baud_rate: 115200
+  stop_bits: 1
+  rx_buffer_size: 128
+
+switch:
+  - platform: balboa_spa
+    light:
+      name: "${friendly_name} Light Switch"
+    heat_mode:
+      name: "${friendly_name} Heat Mode"
+
+button:
+  - platform: balboa_spa
+    jet1:
+      name: "${friendly_name} Jet 1"
+    jet2:
+      name: "${friendly_name} Jet 2"
+    soak:
+      name: "${friendly_name} Soak Mode"
+
+number:
+  - platform: balboa_spa
+    manual_target_temperature:
+      min_value: 70
+      max_value: 106
+      step: 1
+      unit_of_measurement: "°F"
+      name: "${friendly_name} Manual Target Temperature"
+

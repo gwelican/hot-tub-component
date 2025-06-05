@@ -85,7 +85,6 @@ namespace esphome
         } SpaFilterSettings;
 
         sensor::Sensor *current_temp_sensor = new sensor::Sensor();
-        sensor::Sensor *target_temp_sensor = new sensor::Sensor();
         sensor::Sensor *jet1_sensor = new sensor::Sensor();
         sensor::Sensor *jet2_sensor = new sensor::Sensor();
         sensor::Sensor *light_sensor = new sensor::Sensor();
@@ -158,13 +157,12 @@ namespace esphome
             // target temperature
             float target_temperature = Q_in[25];
             
-            // Always update the active_target_temperature sensor (unfiltered, read-only)
-            if (active_target_temp_sensor != nullptr) {
-                active_target_temp_sensor->publish_state(target_temperature);
+            // Always update the controller_target_temperature sensor (unfiltered, read-only)
+            if (controller_target_temp_sensor != nullptr) {
+                controller_target_temp_sensor->publish_state(target_temperature);
             }
             
-            // Legacy target_temperature sensor
-            target_temp_sensor->publish_state(target_temperature);
+            // Update manual target temperature control if it exists
             if (temperature_control_ != nullptr) {
                 temperature_control_->publish_state(target_temperature);
             }
@@ -653,7 +651,11 @@ namespace esphome
 
         void BalboaSpaTemperature::control(float value) {
             if (parent_ && value >= 70 && value <= 106) {
-                parent_->set_target_temperature(value);
+                // Only send command if the value has actually changed
+                if (settemp != static_cast<uint8_t>(value)) {
+                    parent_->set_target_temperature(value);
+                    ESP_LOGD("balboa_spa", "Manual target temperature changed to %.1f°F", value);
+                }
             }
             publish_state(value);
         }
