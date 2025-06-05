@@ -115,6 +115,7 @@ namespace esphome
         target_temp_sensor->add_on_state_callback([this](float value)
                                                   { this->on_target_temperature_update(value); });
       }
+      void set_active_target_temperature_sensor(sensor::Sensor *sens) { active_target_temp_sensor = sens; }
       void set_jet1_sensor(sensor::Sensor *sens) { jet1_sensor = sens; }
       void set_jet2_sensor(sensor::Sensor *sens) { jet2_sensor = sens; }
       void set_light_sensor(sensor::Sensor *sens) { light_sensor = sens; }
@@ -149,6 +150,7 @@ namespace esphome
       // Sensor pointers
       sensor::Sensor *current_temp_sensor{nullptr};
       sensor::Sensor *target_temp_sensor{nullptr};
+      sensor::Sensor *active_target_temp_sensor{nullptr};
       sensor::Sensor *jet1_sensor{nullptr};
       sensor::Sensor *jet2_sensor{nullptr};
       sensor::Sensor *light_sensor{nullptr};

@@ -153,10 +153,17 @@ namespace esphome
             SpaConfig.temp_scale = Q_in[3] & 0x00; // Read temperature scale - 0 -> Farenheit, 1-> Celcius
             have_config = 2;
         }
-        void BalboaSpa::decodeState()
+                void BalboaSpa::decodeState()
         {
             // target temperature
             float target_temperature = Q_in[25];
+            
+            // Always update the active_target_temperature sensor (unfiltered, read-only)
+            if (active_target_temp_sensor != nullptr) {
+                active_target_temp_sensor->publish_state(target_temperature);
+            }
+            
+            // Legacy target_temperature sensor
             target_temp_sensor->publish_state(target_temperature);
             if (temperature_control_ != nullptr) {
                 temperature_control_->publish_state(target_temperature);
@@ -645,7 +652,7 @@ namespace esphome
         }
 
         void BalboaSpaTemperature::control(float value) {
-            if (parent_ && value >= 60 && value <= 104) {
+            if (parent_ && value >= 70 && value <= 106) {
                 parent_->set_target_temperature(value);
             }
             publish_state(value);
@@ -658,8 +665,8 @@ namespace esphome
         }
 
         void BalboaSpa::on_target_temperature_update(float value) {
-            //settemp = value;
-            //command_to_send_ = 0xff;
+            settemp = value;
+            command_to_send_ = 0xff;
         }
 
     } // namespace balboa_spa
