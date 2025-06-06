@@ -38,8 +38,23 @@ sensor:
   - platform: balboa_spa
     current_temperature:
       name: "${friendly_name} Temperature"
+      filters:
+        - filter_out: 0.0           # Filter out 0°F readings
+        - filter_out: 126.0         # Filter out 126°F readings  
+        - clamp:                    # Clamp to official hot tub temperature range
+            min_value: 80.0
+            max_value: 104.0
+        - sliding_window_moving_average:  # Smooth out any remaining noise
+            window_size: 3
+            send_every: 1
     controller_target_temperature:
       name: "${friendly_name} Controller Target Temperature"
+      filters:
+        - filter_out: 0.0           # Filter out 0°F readings
+        - filter_out: 126.0         # Filter out 126°F readings
+        - clamp:                    # Clamp to official hot tub temperature range
+            min_value: 80.0
+            max_value: 104.0
     jet1:
       name: "${friendly_name} Jet 1"
     jet2:
@@ -118,8 +133,8 @@ button:
 number:
   - platform: balboa_spa
     manual_target_temperature:
-      min_value: 70
-      max_value: 106
+      min_value: 80
+      max_value: 104
       step: 1
       unit_of_measurement: "°F"
       name: "${friendly_name} Manual Target Temperature"

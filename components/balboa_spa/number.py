@@ -21,8 +21,8 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_MANUAL_TARGET_TEMPERATURE): number.number_schema(
         BalboaSpaTemperature
     ).extend({
-        cv.Optional("min_value", default=70): cv.float_,
-        cv.Optional("max_value", default=106): cv.float_,
+        cv.Optional("min_value", default=80): cv.float_,
+        cv.Optional("max_value", default=104): cv.float_,
         cv.Optional("step", default=1): cv.float_,
     }),
 })
@@ -42,8 +42,8 @@ async def to_code(config):
         await number.register_number(
             var, 
             conf,
-            min_value=conf.get("min_value", 70),
-            max_value=conf.get("max_value", 106), 
+            min_value=conf.get("min_value", 80),
+            max_value=conf.get("max_value", 104), 
             step=conf.get("step", 1)
         )
         

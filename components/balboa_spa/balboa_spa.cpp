@@ -157,7 +157,7 @@ namespace esphome
             // target temperature
             float target_temperature = Q_in[25];
             
-            // Always update the controller_target_temperature sensor (unfiltered, read-only)
+            // Always update the controller_target_temperature sensor
             if (controller_target_temp_sensor != nullptr) {
                 controller_target_temp_sensor->publish_state(target_temperature);
             }
@@ -650,7 +650,7 @@ namespace esphome
         }
 
         void BalboaSpaTemperature::control(float value) {
-            if (parent_ && value >= 70 && value <= 106) {
+            if (parent_ && value >= 80 && value <= 104) {
                 // Only send command if the value has actually changed
                 if (settemp != static_cast<uint8_t>(value)) {
                     parent_->set_target_temperature(value);
