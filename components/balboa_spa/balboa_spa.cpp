@@ -445,7 +445,6 @@ namespace esphome
         }
         void BalboaSpa::loop()
         {
-            unsigned long start = millis();
             const int MAX_BYTES_PER_LOOP = 8;
             int available = this->available();
             int to_process = (available < MAX_BYTES_PER_LOOP) ? available : MAX_BYTES_PER_LOOP;
@@ -486,20 +485,14 @@ namespace esphome
                             if (id > 0x2F)
                                 id = 0x2F;
                             ESP_LOGD("Spa/node/id", "Got ID, acknowledging");
-                            unsigned long t0 = millis();
                             this->ID_ack();
                             ESP_LOGD(String(id).c_str(), "Spa/node/id");
-                            unsigned long t1 = millis() - t0;
-                            if (t1 > 10) ESP_LOGW(TAG, "ID_ack took %lu ms", t1);
                         }
                         // FE BF 00:Any new clients?
                         if (Q_in.size() > 4 && Q_in[2] == 0xFE && Q_in[4] == 0x00)
                         {
                             ESP_LOGD("Spa/node/id", "Requesting ID");
-                            unsigned long t0 = millis();
                             this->ID_request();
-                            unsigned long t1 = millis() - t0;
-                            if (t1 > 10) ESP_LOGW(TAG, "ID_request took %lu ms", t1);
                         }
                     }
                         // id BF 06:Ready to Send
@@ -587,50 +580,35 @@ namespace esphome
                             Q_out.push(command_to_send_);
                             Q_out.push(0x00);
                         }
-                        unsigned long t0 = millis();
                         rs485_send();
-                        unsigned long t1 = millis() - t0;
-                        if (t1 > 10) ESP_LOGW(TAG, "rs485_send took %lu ms", t1);
                         command_to_send_ = 0x00;
                     }
                     else if (Q_in.size() > 4 && Q_in[2] == id && Q_in[4] == 0x2E)
                     {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
-                            unsigned long t0 = millis();
                             decodeSettings();
-                            unsigned long t1 = millis() - t0;
-                            if (t1 > 10) ESP_LOGW(TAG, "decodeSettings took %lu ms", t1);
                         }
                     }
                     else if (Q_in.size() > 4 && Q_in[2] == id && Q_in[4] == 0x28)
                     {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
-                            unsigned long t0 = millis();
                             decodeFault();
-                            unsigned long t1 = millis() - t0;
-                            if (t1 > 10) ESP_LOGW(TAG, "decodeFault took %lu ms", t1);
                         }
                     }
                     else if (Q_in.size() > 4 && Q_in[2] == 0xFF && Q_in[4] == 0x13)
                     {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
-                            unsigned long t0 = millis();
                             decodeState();
-                            unsigned long t1 = millis() - t0;
-                            if (t1 > 10) ESP_LOGW(TAG, "decodeState took %lu ms", t1);
                         }
                     }
                     else if (Q_in.size() > 4 && Q_in[2] == id && Q_in[4] == 0x23)
                     {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
-                            unsigned long t0 = millis();
                             decodeFilterSettings();
-                            unsigned long t1 = millis() - t0;
-                            if (t1 > 10) ESP_LOGW(TAG, "decodeFilterSettings took %lu ms", t1);
                         }
                     }
                     yield();
@@ -723,26 +701,16 @@ namespace esphome
                 filt2durminute_sensor->publish_state(latest_filt2durminute);
                 last_filt2durminute = latest_filt2durminute;
             }
-            unsigned long elapsed = millis() - start;
-            if (elapsed > 20) {
-                ESP_LOGW(TAG, "loop() took %lu ms", elapsed);
-            }
         }
 
         void BalboaSpaSwitch::write_state(bool state) {
-            unsigned long start = millis();
             publish_state(state);
             if (parent_) {
                 parent_->set_command(command_code_);
             }
-            unsigned long elapsed = millis() - start;
-            if (elapsed > 10) {
-                ESP_LOGW("balboa_spa", "write_state() took %lu ms", elapsed);
-            }
         }
 
         void BalboaSpaTemperature::control(float value) {
-            unsigned long start = millis();
             if (parent_ && value >= 80 && value <= 104) {
                 // Only send command if the value has actually changed
                 if (settemp != static_cast<uint8_t>(value)) {
@@ -751,20 +719,11 @@ namespace esphome
                 }
             }
             publish_state(value);
-            unsigned long elapsed = millis() - start;
-            if (elapsed > 10) {
-                ESP_LOGW("balboa_spa", "control() took %lu ms", elapsed);
-            }
         }
 
         void BalboaSpaButton::press_action() {
-            unsigned long start = millis();
             if (parent_) {
                 parent_->set_command(command_code_);
-            }
-            unsigned long elapsed = millis() - start;
-            if (elapsed > 10) {
-                ESP_LOGW("balboa_spa", "press_action() took %lu ms", elapsed);
             }
         }
 
