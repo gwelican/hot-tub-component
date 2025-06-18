@@ -15,6 +15,28 @@ namespace esphome
     {
 
         static const char *const TAG = "balboa_spa";
+        static float latest_controller_target_temp = NAN, last_controller_target_temp = NAN;
+        static float latest_manual_target_temp = NAN, last_manual_target_temp = NAN;
+        static float latest_current_temp = NAN, last_current_temp = NAN;
+        static float latest_hour = NAN, last_hour = NAN;
+        static float latest_minute = NAN, last_minute = NAN;
+        static float latest_restmode = NAN, last_restmode = NAN;
+        static float latest_heater = NAN, last_heater = NAN;
+        static float latest_highrange = NAN, last_highrange = NAN;
+        static float latest_jet1 = NAN, last_jet1 = NAN;
+        static float latest_jet2 = NAN, last_jet2 = NAN;
+        static float latest_light = NAN, last_light = NAN;
+        static float latest_light_switch = NAN, last_light_switch = NAN;
+        // Filter sensors
+        static float latest_filt1hour = NAN, last_filt1hour = NAN;
+        static float latest_filt1minute = NAN, last_filt1minute = NAN;
+        static float latest_filt1durhour = NAN, last_filt1durhour = NAN;
+        static float latest_filt1durminute = NAN, last_filt1durminute = NAN;
+        static float latest_filt2enable = NAN, last_filt2enable = NAN;
+        static float latest_filt2hour = NAN, last_filt2hour = NAN;
+        static float latest_filt2minute = NAN, last_filt2minute = NAN;
+        static float latest_filt2durhour = NAN, last_filt2durhour = NAN;
+        static float latest_filt2durminute = NAN, last_filt2durminute = NAN;
         uint8_t last_state_crc = 0x00;
         uint8_t command_to_send_ = 0x00;
         
@@ -152,22 +174,10 @@ namespace esphome
             SpaConfig.temp_scale = Q_in[3] & 0x00; // Read temperature scale - 0 -> Farenheit, 1-> Celcius
             have_config = 2;
         }
-                void BalboaSpa::decodeState()
+        void BalboaSpa::decodeState()
         {
             // target temperature
             float target_temperature = Q_in[25];
-            
-            // Always update the controller_target_temperature sensor
-            if (controller_target_temp_sensor != nullptr) {
-                controller_target_temp_sensor->publish_state(target_temperature);
-            }
-            
-            // Update manual target temperature control if it exists
-            if (temperature_control_ != nullptr) {
-                temperature_control_->publish_state(target_temperature);
-            }
-
-            // current temperature
             float current_temperature = 0.0;
             if (Q_in[7] != 0xFF)
             {
@@ -179,60 +189,30 @@ namespace esphome
                 }
                 last_proper_temp = current_temperature;
             }
-            
-            current_temp_sensor->publish_state(current_temperature);
-
             // clock
             SpaState.hour = Q_in[8];
             SpaState.minutes = Q_in[9];
             sethour = SpaState.hour;
             setminute = SpaState.minutes;
-            hour_sensor->publish_state(SpaState.hour);
-            minute_sensor->publish_state(SpaState.minutes);
-
             // restmode
             uint8_t rest_mode = Q_in[10];
-            switch (rest_mode)
-            {
-            case 0x00:
-                SpaState.restmode = 0;
-                restmode_sensor->publish_state(0);
-                break;
-            case 0x03: // Ready-in-Rest
-                SpaState.restmode = 0;
-                restmode_sensor->publish_state(0);
-                break;
-            case 0x01:
-                SpaState.restmode = 1;
-                restmode_sensor->publish_state(1);
-                break;
-            }
-            
-            // heater
             uint8_t heater_state = bitRead(Q_in[15], 5);
-            heater_sensor->publish_state(heater_state);
-            SpaState.heater = heater_state;
-
-            // high range
-            highrange_sensor->publish_state(bitRead(Q_in[15], 2));
-            SpaState.highrange = bitRead(Q_in[15], 2);
-            
-            // jet1
             uint8_t jet1_state = Q_in[16] & 0x03;
-            SpaState.jet1 = jet1_state;
-            jet1_sensor->publish_state(jet1_state);
-
-            // jet2
             uint8_t jet2_state = (Q_in[16] & 0x0C) >> 2;
-            SpaState.jet2 = jet2_state;
-            jet2_sensor->publish_state(jet2_state);
-
-            // light
             uint8_t light_state = Q_in[19] & 0x03;
-            light_sensor->publish_state(light_state);
-            SpaState.light = light_state;
-            light_switch_->publish_state(light_state == 1);
-            
+            // Store latest values
+            latest_controller_target_temp = target_temperature;
+            if (temperature_control_) latest_manual_target_temp = target_temperature;
+            latest_current_temp = current_temperature;
+            latest_hour = SpaState.hour;
+            latest_minute = SpaState.minutes;
+            latest_restmode = (rest_mode == 0x01 ? 1 : 0);
+            latest_heater = heater_state;
+            latest_highrange = bitRead(Q_in[15], 2);
+            latest_jet1 = jet1_state;
+            latest_jet2 = jet2_state;
+            latest_light = light_state;
+            latest_light_switch = (light_state == 1 ? 1 : 0);
             last_state_crc = Q_in[Q_in[1]];
         }
         void BalboaSpa::decodeFilterSettings()
@@ -247,7 +227,6 @@ namespace esphome
             SpaFilterSettings.filt2Minute = Q_in[10];
             SpaFilterSettings.filt2DurationHour = Q_in[11];
             SpaFilterSettings.filt2DurationMinute = Q_in[12];
-
             // Set data for setting settings
             setfilt1Hour = SpaFilterSettings.filt1Hour;
             setfilt1Minute = SpaFilterSettings.filt1Minute;
@@ -257,18 +236,6 @@ namespace esphome
             setfilt2Minute = SpaFilterSettings.filt2Minute;
             setfilt2DurationHour = SpaFilterSettings.filt2DurationHour;
             setfilt2DurationMinute = SpaFilterSettings.filt2DurationMinute;
-
-            // Push data to HA
-            filt1hour_sensor->publish_state(SpaFilterSettings.filt1Hour);
-            filt1minute_sensor->publish_state(SpaFilterSettings.filt1Minute);
-            filt1durhour_sensor->publish_state(SpaFilterSettings.filt1DurationHour);
-            filt1durminute_sensor->publish_state(SpaFilterSettings.filt1DurationMinute);
-            filt2enable_sensor->publish_state(SpaFilterSettings.filt2Enable);
-            filt2hour_sensor->publish_state(SpaFilterSettings.filt2Hour);
-            filt2minute_sensor->publish_state(SpaFilterSettings.filt2Minute);
-            filt2durhour_sensor->publish_state(SpaFilterSettings.filt2DurationHour);
-            filt2durminute_sensor->publish_state(SpaFilterSettings.filt2DurationMinute);
-
             // Filter 1 time conversion for log
             //  if (SpaFilterSettings.filt1Hour < 10) s = "0"; else s = "";
             //  s = String(SpaFilterSettings.filt1Hour) + ":";
@@ -297,7 +264,16 @@ namespace esphome
 
             // payld = "{\"start\":\""+s+"\",\"duration\":\""+d+"\"}";
             // ESP_LOGD("Spa/filter2/state", "Value: ", payld.c_str());
-
+            // Store latest values
+            latest_filt1hour = SpaFilterSettings.filt1Hour;
+            latest_filt1minute = SpaFilterSettings.filt1Minute;
+            latest_filt1durhour = SpaFilterSettings.filt1DurationHour;
+            latest_filt1durminute = SpaFilterSettings.filt1DurationMinute;
+            latest_filt2enable = SpaFilterSettings.filt2Enable;
+            latest_filt2hour = SpaFilterSettings.filt2Hour;
+            latest_filt2minute = SpaFilterSettings.filt2Minute;
+            latest_filt2durhour = SpaFilterSettings.filt2DurationHour;
+            latest_filt2durminute = SpaFilterSettings.filt2DurationMinute;
             have_filtersettings = 2;
             // ESP_LOGD("Spa/debug/have_filtersettings", "have the filter settings, #2");
         }
@@ -469,24 +445,27 @@ namespace esphome
         }
         void BalboaSpa::loop()
         {
-            yield();
-            while (this->available() > 0)
+            unsigned long start = millis();
+            const int MAX_BYTES_PER_LOOP = 8;
+            int available = this->available();
+            int to_process = (available < MAX_BYTES_PER_LOOP) ? available : MAX_BYTES_PER_LOOP;
+            if (to_process == 0) return;
+            for (int i = 0; i < to_process; i++)
             {
                 int x = this->read();
                 Q_in.push(x);
-
                 // Drop until SOF is seen
-                if (Q_in.first() != 0x7E)
+                if (Q_in.size() > 0 && Q_in.first() != 0x7E)
                 {
                     Q_in.clear();
+                    continue;
                 }
-
                 // Double SOF-marker, drop last one
-                if (Q_in[1] == 0x7E && Q_in.size() > 1)
+                if (Q_in.size() > 1 && Q_in[1] == 0x7E)
+                {
                     Q_in.pop();
-
                 // Complete package
-                // if (x == 0x7E && Q_in[0] == 0x7E && Q_in[1] != 0x7E) {
+                }
                 if (x == 0x7E && Q_in.size() > 2)
                 {
                     // ESP_LOGD("Spa/debug", "Got a package");
@@ -494,32 +473,38 @@ namespace esphome
                     if (id == 0)
                     {
                         ESP_LOGD("Spa/node/id", "Unregistered");
-                        if (Q_in[2] == 0xFE)
+                        if (Q_in.size() > 2 && Q_in[2] == 0xFE)
                         {
                             print_msg(Q_in);
                             ESP_LOGD("Spa/node/id", "Unregistered");
                         }
                         // print_msg(Q_in);
                         //  FE BF 02:got new client ID
-                        if (Q_in[2] == 0xFE && Q_in[4] == 0x02)
+                        if (Q_in.size() > 4 && Q_in[2] == 0xFE && Q_in[4] == 0x02)
                         {
                             id = Q_in[5];
                             if (id > 0x2F)
                                 id = 0x2F;
                             ESP_LOGD("Spa/node/id", "Got ID, acknowledging");
+                            unsigned long t0 = millis();
                             this->ID_ack();
                             ESP_LOGD(String(id).c_str(), "Spa/node/id");
+                            unsigned long t1 = millis() - t0;
+                            if (t1 > 10) ESP_LOGW(TAG, "ID_ack took %lu ms", t1);
                         }
                         // FE BF 00:Any new clients?
-                        if (Q_in[2] == 0xFE && Q_in[4] == 0x00)
+                        if (Q_in.size() > 4 && Q_in[2] == 0xFE && Q_in[4] == 0x00)
                         {
                             ESP_LOGD("Spa/node/id", "Requesting ID");
+                            unsigned long t0 = millis();
                             this->ID_request();
+                            unsigned long t1 = millis() - t0;
+                            if (t1 > 10) ESP_LOGW(TAG, "ID_request took %lu ms", t1);
                         }
                     }
-                    else if (Q_in[2] == id && Q_in[4] == 0x06)
-                    { // we have an ID, do clever stuff
                         // id BF 06:Ready to Send
+                    else if (Q_in.size() > 4 && Q_in[2] == id && Q_in[4] == 0x06)
+                    {
                         if (command_to_send_ == 0x21)
                         {
                             Q_out.push(id);
@@ -537,7 +522,7 @@ namespace esphome
                             Q_out.push(settemp);
                         }
                         else if (command_to_send_ == 0x23)
-                        { // Set filter times
+                        {
                             Q_out.push(id);
                             Q_out.push(0xBF);
                             Q_out.push(0x23);
@@ -602,54 +587,162 @@ namespace esphome
                             Q_out.push(command_to_send_);
                             Q_out.push(0x00);
                         }
-
+                        unsigned long t0 = millis();
                         rs485_send();
+                        unsigned long t1 = millis() - t0;
+                        if (t1 > 10) ESP_LOGW(TAG, "rs485_send took %lu ms", t1);
                         command_to_send_ = 0x00;
                     }
-                    else if (Q_in[2] == id && Q_in[4] == 0x2E)
+                    else if (Q_in.size() > 4 && Q_in[2] == id && Q_in[4] == 0x2E)
                     {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
+                            unsigned long t0 = millis();
                             decodeSettings();
+                            unsigned long t1 = millis() - t0;
+                            if (t1 > 10) ESP_LOGW(TAG, "decodeSettings took %lu ms", t1);
                         }
                     }
-                    else if (Q_in[2] == id && Q_in[4] == 0x28)
+                    else if (Q_in.size() > 4 && Q_in[2] == id && Q_in[4] == 0x28)
                     {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
+                            unsigned long t0 = millis();
                             decodeFault();
+                            unsigned long t1 = millis() - t0;
+                            if (t1 > 10) ESP_LOGW(TAG, "decodeFault took %lu ms", t1);
                         }
                     }
-                    else if (Q_in[2] == 0xFF && Q_in[4] == 0x13)
-                    { // FF AF 13:Status Update - Packet index offset 5
+                    else if (Q_in.size() > 4 && Q_in[2] == 0xFF && Q_in[4] == 0x13)
+                    {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
+                            unsigned long t0 = millis();
                             decodeState();
+                            unsigned long t1 = millis() - t0;
+                            if (t1 > 10) ESP_LOGW(TAG, "decodeState took %lu ms", t1);
                         }
                     }
-                    else if (Q_in[2] == id && Q_in[4] == 0x23)
-                    { // FF AF 23:Filter Cycle Message - Packet index offset 5
+                    else if (Q_in.size() > 4 && Q_in[2] == id && Q_in[4] == 0x23)
+                    {
                         if (last_state_crc != Q_in[Q_in[1]])
                         {
+                            unsigned long t0 = millis();
                             decodeFilterSettings();
+                            unsigned long t1 = millis() - t0;
+                            if (t1 > 10) ESP_LOGW(TAG, "decodeFilterSettings took %lu ms", t1);
                         }
-                    } 
-
+                    }
                     yield();
                     Q_in.clear();
                 }
-                lastrx = millis();
+            }
+            // Publish sensors if value changed
+            if (!isnan(latest_controller_target_temp) && latest_controller_target_temp != last_controller_target_temp && controller_target_temp_sensor) {
+                controller_target_temp_sensor->publish_state(latest_controller_target_temp);
+                last_controller_target_temp = latest_controller_target_temp;
+            }
+            if (!isnan(latest_manual_target_temp) && latest_manual_target_temp != last_manual_target_temp && temperature_control_) {
+                temperature_control_->publish_state(latest_manual_target_temp);
+                last_manual_target_temp = latest_manual_target_temp;
+            }
+            if (!isnan(latest_current_temp) && latest_current_temp != last_current_temp && current_temp_sensor) {
+                current_temp_sensor->publish_state(latest_current_temp);
+                last_current_temp = latest_current_temp;
+            }
+            if (!isnan(latest_hour) && latest_hour != last_hour && hour_sensor) {
+                hour_sensor->publish_state(latest_hour);
+                last_hour = latest_hour;
+            }
+            if (!isnan(latest_minute) && latest_minute != last_minute && minute_sensor) {
+                minute_sensor->publish_state(latest_minute);
+                last_minute = latest_minute;
+            }
+            if (!isnan(latest_restmode) && latest_restmode != last_restmode && restmode_sensor) {
+                restmode_sensor->publish_state(latest_restmode);
+                last_restmode = latest_restmode;
+            }
+            if (!isnan(latest_heater) && latest_heater != last_heater && heater_sensor) {
+                heater_sensor->publish_state(latest_heater);
+                last_heater = latest_heater;
+            }
+            if (!isnan(latest_highrange) && latest_highrange != last_highrange && highrange_sensor) {
+                highrange_sensor->publish_state(latest_highrange);
+                last_highrange = latest_highrange;
+            }
+            if (!isnan(latest_jet1) && latest_jet1 != last_jet1 && jet1_sensor) {
+                jet1_sensor->publish_state(latest_jet1);
+                last_jet1 = latest_jet1;
+            }
+            if (!isnan(latest_jet2) && latest_jet2 != last_jet2 && jet2_sensor) {
+                jet2_sensor->publish_state(latest_jet2);
+                last_jet2 = latest_jet2;
+            }
+            if (!isnan(latest_light) && latest_light != last_light && light_sensor) {
+                light_sensor->publish_state(latest_light);
+                last_light = latest_light;
+            }
+            if (!isnan(latest_light_switch) && latest_light_switch != last_light_switch && light_switch_) {
+                light_switch_->publish_state(latest_light_switch == 1);
+                last_light_switch = latest_light_switch;
+            }
+            // Filter sensors
+            if (!isnan(latest_filt1hour) && latest_filt1hour != last_filt1hour && filt1hour_sensor) {
+                filt1hour_sensor->publish_state(latest_filt1hour);
+                last_filt1hour = latest_filt1hour;
+            }
+            if (!isnan(latest_filt1minute) && latest_filt1minute != last_filt1minute && filt1minute_sensor) {
+                filt1minute_sensor->publish_state(latest_filt1minute);
+                last_filt1minute = latest_filt1minute;
+            }
+            if (!isnan(latest_filt1durhour) && latest_filt1durhour != last_filt1durhour && filt1durhour_sensor) {
+                filt1durhour_sensor->publish_state(latest_filt1durhour);
+                last_filt1durhour = latest_filt1durhour;
+            }
+            if (!isnan(latest_filt1durminute) && latest_filt1durminute != last_filt1durminute && filt1durminute_sensor) {
+                filt1durminute_sensor->publish_state(latest_filt1durminute);
+                last_filt1durminute = latest_filt1durminute;
+            }
+            if (!isnan(latest_filt2enable) && latest_filt2enable != last_filt2enable && filt2enable_sensor) {
+                filt2enable_sensor->publish_state(latest_filt2enable);
+                last_filt2enable = latest_filt2enable;
+            }
+            if (!isnan(latest_filt2hour) && latest_filt2hour != last_filt2hour && filt2hour_sensor) {
+                filt2hour_sensor->publish_state(latest_filt2hour);
+                last_filt2hour = latest_filt2hour;
+            }
+            if (!isnan(latest_filt2minute) && latest_filt2minute != last_filt2minute && filt2minute_sensor) {
+                filt2minute_sensor->publish_state(latest_filt2minute);
+                last_filt2minute = latest_filt2minute;
+            }
+            if (!isnan(latest_filt2durhour) && latest_filt2durhour != last_filt2durhour && filt2durhour_sensor) {
+                filt2durhour_sensor->publish_state(latest_filt2durhour);
+                last_filt2durhour = latest_filt2durhour;
+            }
+            if (!isnan(latest_filt2durminute) && latest_filt2durminute != last_filt2durminute && filt2durminute_sensor) {
+                filt2durminute_sensor->publish_state(latest_filt2durminute);
+                last_filt2durminute = latest_filt2durminute;
+            }
+            unsigned long elapsed = millis() - start;
+            if (elapsed > 20) {
+                ESP_LOGW(TAG, "loop() took %lu ms", elapsed);
             }
         }
 
         void BalboaSpaSwitch::write_state(bool state) {
+            unsigned long start = millis();
             publish_state(state);
             if (parent_) {
                 parent_->set_command(command_code_);
             }
+            unsigned long elapsed = millis() - start;
+            if (elapsed > 10) {
+                ESP_LOGW("balboa_spa", "write_state() took %lu ms", elapsed);
+            }
         }
 
         void BalboaSpaTemperature::control(float value) {
+            unsigned long start = millis();
             if (parent_ && value >= 80 && value <= 104) {
                 // Only send command if the value has actually changed
                 if (settemp != static_cast<uint8_t>(value)) {
@@ -658,11 +751,20 @@ namespace esphome
                 }
             }
             publish_state(value);
+            unsigned long elapsed = millis() - start;
+            if (elapsed > 10) {
+                ESP_LOGW("balboa_spa", "control() took %lu ms", elapsed);
+            }
         }
 
         void BalboaSpaButton::press_action() {
+            unsigned long start = millis();
             if (parent_) {
                 parent_->set_command(command_code_);
+            }
+            unsigned long elapsed = millis() - start;
+            if (elapsed > 10) {
+                ESP_LOGW("balboa_spa", "press_action() took %lu ms", elapsed);
             }
         }
 
