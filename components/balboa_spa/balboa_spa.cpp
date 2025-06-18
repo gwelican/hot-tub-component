@@ -616,6 +616,42 @@ namespace esphome
                 }
             }
             // Publish sensors if value changed
+            if (filt1hour_sensor && !isnan(latest_filt1hour) && latest_filt1hour != last_filt1hour) {
+                filt1hour_sensor->publish_state(latest_filt1hour);
+                last_filt1hour = latest_filt1hour;
+            }
+            if (filt1minute_sensor && !isnan(latest_filt1minute) && latest_filt1minute != last_filt1minute) {
+                filt1minute_sensor->publish_state(latest_filt1minute);
+                last_filt1minute = latest_filt1minute;
+            }
+            if (filt1durhour_sensor && !isnan(latest_filt1durhour) && latest_filt1durhour != last_filt1durhour) {
+                filt1durhour_sensor->publish_state(latest_filt1durhour);
+                last_filt1durhour = latest_filt1durhour;
+            }
+            if (filt1durminute_sensor && !isnan(latest_filt1durminute) && latest_filt1durminute != last_filt1durminute) {
+                filt1durminute_sensor->publish_state(latest_filt1durminute);
+                last_filt1durminute = latest_filt1durminute;
+            }
+            if (filt2enable_sensor && !isnan(latest_filt2enable) && latest_filt2enable != last_filt2enable) {
+                filt2enable_sensor->publish_state(latest_filt2enable);
+                last_filt2enable = latest_filt2enable;
+            }
+            if (filt2hour_sensor && !isnan(latest_filt2hour) && latest_filt2hour != last_filt2hour) {
+                filt2hour_sensor->publish_state(latest_filt2hour);
+                last_filt2hour = latest_filt2hour;
+            }
+            if (filt2minute_sensor && !isnan(latest_filt2minute) && latest_filt2minute != last_filt2minute) {
+                filt2minute_sensor->publish_state(latest_filt2minute);
+                last_filt2minute = latest_filt2minute;
+            }
+            if (filt2durhour_sensor && !isnan(latest_filt2durhour) && latest_filt2durhour != last_filt2durhour) {
+                filt2durhour_sensor->publish_state(latest_filt2durhour);
+                last_filt2durhour = latest_filt2durhour;
+            }
+            if (filt2durminute_sensor && !isnan(latest_filt2durminute) && latest_filt2durminute != last_filt2durminute) {
+                filt2durminute_sensor->publish_state(latest_filt2durminute);
+                last_filt2durminute = latest_filt2durminute;
+            }
             if (!isnan(latest_controller_target_temp) && latest_controller_target_temp != last_controller_target_temp && controller_target_temp_sensor) {
                 controller_target_temp_sensor->publish_state(latest_controller_target_temp);
                 last_controller_target_temp = latest_controller_target_temp;
@@ -663,43 +699,6 @@ namespace esphome
             if (!isnan(latest_light_switch) && latest_light_switch != last_light_switch && light_switch_) {
                 light_switch_->publish_state(latest_light_switch == 1);
                 last_light_switch = latest_light_switch;
-            }
-            // Filter sensors
-            if (!isnan(latest_filt1hour) && latest_filt1hour != last_filt1hour && filt1hour_sensor) {
-                filt1hour_sensor->publish_state(latest_filt1hour);
-                last_filt1hour = latest_filt1hour;
-            }
-            if (!isnan(latest_filt1minute) && latest_filt1minute != last_filt1minute && filt1minute_sensor) {
-                filt1minute_sensor->publish_state(latest_filt1minute);
-                last_filt1minute = latest_filt1minute;
-            }
-            if (!isnan(latest_filt1durhour) && latest_filt1durhour != last_filt1durhour && filt1durhour_sensor) {
-                filt1durhour_sensor->publish_state(latest_filt1durhour);
-                last_filt1durhour = latest_filt1durhour;
-            }
-            if (!isnan(latest_filt1durminute) && latest_filt1durminute != last_filt1durminute && filt1durminute_sensor) {
-                filt1durminute_sensor->publish_state(latest_filt1durminute);
-                last_filt1durminute = latest_filt1durminute;
-            }
-            if (!isnan(latest_filt2enable) && latest_filt2enable != last_filt2enable && filt2enable_sensor) {
-                filt2enable_sensor->publish_state(latest_filt2enable);
-                last_filt2enable = latest_filt2enable;
-            }
-            if (!isnan(latest_filt2hour) && latest_filt2hour != last_filt2hour && filt2hour_sensor) {
-                filt2hour_sensor->publish_state(latest_filt2hour);
-                last_filt2hour = latest_filt2hour;
-            }
-            if (!isnan(latest_filt2minute) && latest_filt2minute != last_filt2minute && filt2minute_sensor) {
-                filt2minute_sensor->publish_state(latest_filt2minute);
-                last_filt2minute = latest_filt2minute;
-            }
-            if (!isnan(latest_filt2durhour) && latest_filt2durhour != last_filt2durhour && filt2durhour_sensor) {
-                filt2durhour_sensor->publish_state(latest_filt2durhour);
-                last_filt2durhour = latest_filt2durhour;
-            }
-            if (!isnan(latest_filt2durminute) && latest_filt2durminute != last_filt2durminute && filt2durminute_sensor) {
-                filt2durminute_sensor->publish_state(latest_filt2durminute);
-                last_filt2durminute = latest_filt2durminute;
             }
         }
 
