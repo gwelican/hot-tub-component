@@ -15,7 +15,7 @@ esp32:
     type: arduino
 
 logger:
-  level: debug
+  level: DEBUG
   logs:
     uart: INFO
 
@@ -101,13 +101,13 @@ wifi:
 
 captive_portal:
 
-bluetooth_proxy:
-  active: True
+# bluetooth_proxy:
+#   active: True
 
 uart:
   id: spa_uart_bus
-  tx_pin: GPIO01
-  rx_pin: GPIO03
+  tx_pin: GPIO016
+  rx_pin: GPIO017
   parity: NONE  
   data_bits: 8
   baud_rate: 115200
