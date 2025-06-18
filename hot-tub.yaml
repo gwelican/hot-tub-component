@@ -65,30 +65,30 @@ sensor:
       name: "${friendly_name} Rest Mode"
     highrange:
       name: "${friendly_name} High Range"
-    hour:
-      name: "${friendly_name} Hour"
-    minute:
-      name: "${friendly_name} Minute"
-    heater:
-      name: "${friendly_name} Heater"
-    filt1hour:
-      name: "${friendly_name} Filter 1 Hour"
-    filt1minute:
-      name: "${friendly_name} Filter 1 Minute"
-    filt1durhour:
-      name: "${friendly_name} Filter 1 Duration Hour"
-    filt1durminute:
-      name: "${friendly_name} Filter 1 Duration Minute"
-    filt2enable:
-      name: "${friendly_name} Filter 2 Enable"
-    filt2hour:
-      name: "${friendly_name} Filter 2 Hour"
-    filt2minute:
-      name: "${friendly_name} Filter 2 Minute"
-    filt2durhour:
-      name: "${friendly_name} Filter 2 Duration Hour"
-    filt2durminute:
-      name: "${friendly_name} Filter 2 Duration Minute"
+    # hour:
+    #   name: "${friendly_name} Hour"
+    # minute:
+    #   name: "${friendly_name} Minute"
+    # heater:
+    #   name: "${friendly_name} Heater"
+    # filt1hour:
+    #   name: "${friendly_name} Filter 1 Hour"
+    # filt1minute:
+    #   name: "${friendly_name} Filter 1 Minute"
+    # filt1durhour:
+    #   name: "${friendly_name} Filter 1 Duration Hour"
+    # filt1durminute:
+    #   name: "${friendly_name} Filter 1 Duration Minute"
+    # filt2enable:
+    #   name: "${friendly_name} Filter 2 Enable"
+    # filt2hour:
+    #   name: "${friendly_name} Filter 2 Hour"
+    # filt2minute:
+    #   name: "${friendly_name} Filter 2 Minute"
+    # filt2durhour:
+    #   name: "${friendly_name} Filter 2 Duration Hour"
+    # filt2durminute:
+    #   name: "${friendly_name} Filter 2 Duration Minute"
 
 wifi:
   ssid: !secret wifi_ssid
